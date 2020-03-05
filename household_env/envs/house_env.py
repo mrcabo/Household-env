@@ -9,6 +9,19 @@ from gym.envs.classic_control import rendering
 
 FPS = 60
 
+VIEWPORT_W = 600
+VIEWPORT_H = 600
+
+
+class ObjectColors:
+    colors = {'TV': (0, 0.9, 0.4),
+              'couch': (0.4, 0.2, 0)
+              }
+
+    @staticmethod
+    def get_color(object_name):
+        return ObjectColors.colors[object_name]
+
 
 class HouseholdEnv(gym.Env, EzPickle):
     metadata = {
@@ -23,6 +36,8 @@ class HouseholdEnv(gym.Env, EzPickle):
         # Define our grid map dimensions
         self.map_height = 20
         self.map_width = 20
+        self.scale = VIEWPORT_W / self.map_width
+        self.robot_pos = (0, 0)
 
         self.reset()
 
@@ -30,10 +45,10 @@ class HouseholdEnv(gym.Env, EzPickle):
         pass
 
     def _generate_house(self):
-        self.house_objects = {'TV': {(0, 0), (0, 1), (0, 2)},
-                              'couch': {(4, 0), (4, 1), (4, 2)}}
-
-        # All the objects that the robot might collide with, so its easier to see if it can move
+        self.house_objects = {'TV': {(0, 19), (0, 18), (0, 17)},
+                              'couch': {(4, 19), (4, 18), (4, 17)}
+                              }
+        # All the objects that the robot might collide with, so its easier to see if it can move without colliding
         self.colliding_objects = set()
         for values in self.house_objects.values():
             self.colliding_objects = self.colliding_objects.union(values)
@@ -50,15 +65,32 @@ class HouseholdEnv(gym.Env, EzPickle):
         self._generate_house()
 
     def render(self, mode='human'):
-        screen_width = 600
-        screen_height = 600
-
-        scale = screen_width / self.map_width
-
         if self.viewer is None:
-            self.viewer = rendering.Viewer(screen_width, screen_height)
+            self.viewer = rendering.Viewer(VIEWPORT_W, VIEWPORT_H)
+            self.viewer.set_bounds(0, VIEWPORT_W, 0, VIEWPORT_H)  # TODO:necessary? they do it in bipedal and lunar
+
+        self._draw_robot()
+        self._draw_objects()
 
         return self.viewer.render(return_rgb_array=mode == 'rgb_array')
 
     def close(self):
-        pass
+        if self.viewer is not None:
+            self.viewer.close()
+            self.viewer = None
+
+    def _draw_objects(self):
+        for obj, pos in self.house_objects.items():
+            color = ObjectColors.get_color(obj)
+            for square in pos:
+                self._draw_square(square, color)
+
+    def _draw_square(self, pos, color):
+        x, y = pos
+        v = [(x * self.scale, y * self.scale), (x * self.scale, (y + 1) * self.scale),
+             ((x + 1) * self.scale, (y + 1) * self.scale), ((x + 1) * self.scale, y * self.scale)]
+        self.viewer.draw_polygon(v, color=color)
+
+    def _draw_robot(self):
+        # TODO: Maybe draw a nicer robot? :D
+        self._draw_square(self.robot_pos, color=(0.5, 0.5, 0.5))
