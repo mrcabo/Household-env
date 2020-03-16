@@ -41,6 +41,8 @@ class HouseholdEnv(gym.Env, EzPickle):
 
         self.reset()
 
+        self.action_space = spaces.Discrete(8)
+
     def __del__(self):
         pass
 
@@ -54,15 +56,55 @@ class HouseholdEnv(gym.Env, EzPickle):
             self.colliding_objects = self.colliding_objects.union(values)
         print(f"Occupied places are {self.colliding_objects}")  # TODO:debug only
 
+    def _move_up(self):
+        x, y = self.robot_pos
+        if (y + 1) >= self.map_height:
+            return -1  # TODO: neg reward for bumping into wall
+        self.robot_pos = (x, y + 1)
+        return 0
+
+    def _move_down(self):
+        x, y = self.robot_pos
+        if (y - 1) < 0:
+            return -1  # TODO: neg reward for bumping into wall
+        self.robot_pos = (x, y - 1)
+        return 0
+
+    def _move_left(self):
+        x, y = self.robot_pos
+        if (x - 1) < 0:
+            return -1  # TODO: neg reward for bumping into wall
+        self.robot_pos = (x - 1, y)
+        return 0
+
+    def _move_right(self):
+        x, y = self.robot_pos
+        if (x + 1) >= self.map_width:
+            return -1  # TODO: neg reward for bumping into wall
+        self.robot_pos = (x + 1, y)
+        return 0
+
     def seed(self, seed=None):
         self.np_random, seed = seeding.np_random(seed)
         return [seed]
 
     def step(self, action):
-        pass
+        print(f"Action to be done: {action}")  # TODO debug
+        assert self.action_space.contains(action), "%r (%s) invalid" % (action, type(action))
+        aux = self.action_dict[action]()
+
+        return None, aux, False, {}
 
     def reset(self):
         self._generate_house()
+        self.action_dict = {0: self._move_up,
+                            1: self._move_down,
+                            2: self._move_left,
+                            3: self._move_right,
+                            4: self._move_up,  # TODO..
+                            5: self._move_down,
+                            6: self._move_left,
+                            7: self._move_right}
 
     def render(self, mode='human'):
         if self.viewer is None:
