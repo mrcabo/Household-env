@@ -58,30 +58,33 @@ class HouseholdEnv(gym.Env, EzPickle):
 
     def _move_up(self):
         x, y = self.robot_pos
-        if (y + 1) >= self.map_height:
-            return -1  # TODO: neg reward for bumping into wall
-        self.robot_pos = (x, y + 1)
-        return 0
+        new_pos = (x, y + 1)
+        return self._move(new_pos, restriction=new_pos[1] >= self.map_height)
 
     def _move_down(self):
         x, y = self.robot_pos
-        if (y - 1) < 0:
-            return -1  # TODO: neg reward for bumping into wall
-        self.robot_pos = (x, y - 1)
-        return 0
+        new_pos = (x, y - 1)
+        return self._move(new_pos, restriction=new_pos[1] < 0)
 
     def _move_left(self):
         x, y = self.robot_pos
-        if (x - 1) < 0:
-            return -1  # TODO: neg reward for bumping into wall
-        self.robot_pos = (x - 1, y)
-        return 0
+        new_pos = (x - 1, y)
+        return self._move(new_pos, restriction=new_pos[0] < 0)
 
     def _move_right(self):
         x, y = self.robot_pos
-        if (x + 1) >= self.map_width:
+        new_pos = (x + 1, y)
+        return self._move(new_pos, restriction=new_pos[0] >= self.map_width)
+
+    def _move(self, new_pos, restriction):
+        # Check if it collides with an object
+        if new_pos in self.colliding_objects:
+            print("Tried to bump into object")  # TODO debug
+            return -1  # TODO: neg reward for bumping into object
+        if restriction:
+            print("Tried to bump into wall")  # TODO debug
             return -1  # TODO: neg reward for bumping into wall
-        self.robot_pos = (x + 1, y)
+        self.robot_pos = new_pos
         return 0
 
     def seed(self, seed=None):
@@ -89,7 +92,6 @@ class HouseholdEnv(gym.Env, EzPickle):
         return [seed]
 
     def step(self, action):
-        print(f"Action to be done: {action}")  # TODO debug
         assert self.action_space.contains(action), "%r (%s) invalid" % (action, type(action))
         aux = self.action_dict[action]()
 
