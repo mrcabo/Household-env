@@ -136,5 +136,45 @@ class HouseholdEnv(gym.Env, EzPickle):
         self.viewer.draw_polygon(v, color=color)
 
     def _draw_robot(self):
-        # TODO: Maybe draw a nicer robot? :D
-        self._draw_square(self.robot_pos, color=(0.5, 0.5, 0.5))
+        # self._draw_square(self.robot_pos, color=(0.5, 0.5, 0.5))
+        x, y = self.robot_pos
+        # Draw body
+        v = [((x + 0.1) * self.scale, y * self.scale),
+             ((x + 0.1) * self.scale, (y + 0.8) * self.scale),
+             ((x + 0.9) * self.scale, (y + 0.8) * self.scale),
+             ((x + 0.9) * self.scale, y * self.scale)]
+        self.viewer.draw_polygon(v, color=(0.701, 0.701, 0.701))
+        # Draw ears
+        for dx1, dx2 in ((0, 0.1), (0.9, 1)):
+            v = [((x + dx1) * self.scale, (y + 0.275) * self.scale),
+                 ((x + dx1) * self.scale, (y + 0.525) * self.scale),
+                 ((x + dx2) * self.scale, (y + 0.525) * self.scale),
+                 ((x + dx2) * self.scale, (y + 0.275) * self.scale)]
+            self.viewer.draw_polygon(v, color=(0.6, 0.6, 0.6))
+        # Draw hat
+        v = [((x + 0.175) * self.scale, (y + 0.8) * self.scale),
+             ((x + 0.3) * self.scale, (y + .95) * self.scale),
+             ((x + 0.7) * self.scale, (y + .95) * self.scale),
+             ((x + 0.825) * self.scale, (y + 0.8) * self.scale)]
+        self.viewer.draw_polygon(v, color=(0.6, 0.6, 0.6))
+        # Draw mouth
+        v = [((x + 0.2) * self.scale, (y + 0.15) * self.scale),
+             ((x + 0.2) * self.scale, (y + 0.35) * self.scale),
+             ((x + 0.8) * self.scale, (y + 0.35) * self.scale),
+             ((x + 0.8) * self.scale, (y + 0.15) * self.scale)]
+        self.viewer.draw_polygon(v, color=(0.9, 0.9, 0.9))
+        # teeth
+        number_teeth = 6
+        dist = 0.6 / number_teeth
+        for i in range(1, number_teeth):
+            p1 = ((x + 0.2 + i * dist) * self.scale, (y + 0.15) * self.scale)
+            p2 = ((x + 0.2 + i * dist) * self.scale, (y + 0.35) * self.scale)
+            self.viewer.draw_polyline((p1, p2), color=(0, 0, 0), linewidth=1.75)
+        # v = [((x + 0.2 + 0.1) * self.scale, (y + 0.15) * self.scale),
+        #      ((x + 0.2 + 0.1) * self.scale, (y + 0.35) * self.scale)]
+        # self.viewer.draw_polyline(path, color=obj.color2, linewidth=2)
+
+        # Draw eyes
+        for dx in (0.30, 0.7):
+            t = rendering.Transform(translation=((x + dx) * self.scale, (y + 0.5625) * self.scale))
+            self.viewer.draw_circle(radius=(0.12 * self.scale), res=10, color=(0.643, 0.039, 0.039)).add_attr(t)
