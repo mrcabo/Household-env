@@ -1,3 +1,5 @@
+import json
+
 import gym
 from gym import error, spaces, utils
 from gym.utils import seeding, EzPickle
@@ -14,9 +16,8 @@ VIEWPORT_H = 600
 
 
 class ObjectColors:
-    colors = {'TV': (0, 0.9, 0.4),
-              'couch': (0.4, 0.2, 0)
-              }
+    with open('colors_house_objects.json') as json_file:
+        colors = json.load(json_file)
 
     @staticmethod
     def get_color(object_name):
@@ -47,12 +48,12 @@ class HouseholdEnv(gym.Env, EzPickle):
         pass
 
     def _generate_house(self):
-        self.house_objects = {'TV': {(0, 19), (0, 18), (0, 17)},
-                              'couch': {(4, 19), (4, 18), (4, 17)}
-                              }
+        with open('house_objects.json') as json_file:
+            self.house_objects = json.load(json_file)
         # All the objects that the robot might collide with, so its easier to see if it can move without colliding
         self.colliding_objects = set()
         for values in self.house_objects.values():
+            values = [tuple(x) for x in values]
             self.colliding_objects = self.colliding_objects.union(values)
         print(f"Occupied places are {self.colliding_objects}")  # TODO:debug only
 
