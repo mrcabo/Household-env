@@ -1,6 +1,7 @@
 import json
 import random
 
+import numpy as np
 import gym
 from gym import error, spaces, utils
 from gym.utils import seeding, EzPickle
@@ -43,7 +44,11 @@ class HouseholdEnv(gym.Env, EzPickle):
 
         self.reset()
 
+        low = np.hstack((np.zeros(2), np.zeros(49)))
+        high = np.hstack((np.array([19, 19]), np.array([10] * 49)))
         self.action_space = spaces.Discrete(8)
+        self.observation_space = spaces.Box(low, high, dtype=np.float32)
+        print("j")
 
     def __del__(self):
         pass
@@ -97,6 +102,7 @@ class HouseholdEnv(gym.Env, EzPickle):
         assert self.action_space.contains(action), "%r (%s) invalid" % (action, type(action))
         aux = self.action_dict[action]()
 
+        # return np.array(state), reward, done, {}
         return None, aux, False, {}
 
     def reset(self):
