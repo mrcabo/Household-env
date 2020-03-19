@@ -44,8 +44,9 @@ class HouseholdEnv(gym.Env, EzPickle):
 
         self.reset()
 
-        low = np.hstack((np.zeros(2), np.zeros(49)))
-        high = np.hstack((np.array([19, 19]), np.array([10] * 49)))
+        # Min-Max values for coordinates, order encoding, object id
+        low = np.hstack((np.zeros(2), np.zeros(5), np.zeros(49)))
+        high = np.hstack((np.array([19, 19]), np.ones(5), np.array([5] * 49)))
         self.action_space = spaces.Discrete(8)
         self.observation_space = spaces.Box(low, high, dtype=np.float32)
         print("j")

@@ -10,9 +10,23 @@ Num   | Observation                |  Min   |  Max
 ------|----------------------------|--------|-------
 0     | x_coord_robot              |  0     |  1
 1     | y_coord_robot              |  0     |  1
-2     | vision_grid                |  0     |  1
+2     | order_encoding             |  0     |  1
 ..    | ..                         |  0     |  1
-50     | vision_grid                |  0     |  1
+6     | order_encoding             |  0     |  1
+7     | vision_grid                |  0     |  1
+..    | ..                         |  0     |  1
+55    | vision_grid                |  0     |  1
+
+Objects will return the following values when within range of the 7x7 vision grid.
+
+Num   | Object
+------|---------------
+0     | Nothing
+1     | TV
+2     | fridge
+3     | couch
+4     | person
+5     | bed
 
 ## Action space
 
