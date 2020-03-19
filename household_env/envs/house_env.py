@@ -1,4 +1,5 @@
 import json
+from functools import partial
 import random
 
 import numpy as np
@@ -48,7 +49,7 @@ class HouseholdEnv(gym.Env, EzPickle):
         low = np.hstack((np.zeros(2), np.zeros(5), np.zeros(49)))
         high = np.hstack((np.array([19, 19]), np.ones(5), np.array([5] * 49)))
         self.action_space = spaces.Discrete(8)
-        self.observation_space = spaces.Box(low, high, dtype=np.float32)
+        self.observation_space = spaces.Box(low, high, dtype=np.int)
         print("j")
 
     def __del__(self):
@@ -95,6 +96,9 @@ class HouseholdEnv(gym.Env, EzPickle):
         self.robot_pos = new_pos
         return 0
 
+    def _add_to_buffer(self, action):
+        self.action_buffer.append(action)
+
     def seed(self, seed=None):
         self.np_random, seed = seeding.np_random(seed)
         return [seed]
@@ -107,15 +111,17 @@ class HouseholdEnv(gym.Env, EzPickle):
         return None, aux, False, {}
 
     def reset(self):
+        self.action_buffer = []
         self._generate_house()
         self.action_dict = {0: self._move_up,
                             1: self._move_down,
                             2: self._move_left,
                             3: self._move_right,
-                            4: self._move_up,  # TODO..
-                            5: self._move_down,
-                            6: self._move_left,
-                            7: self._move_right}
+                            4: partial(self._add_to_buffer, 4),
+                            5: partial(self._add_to_buffer, 5),
+                            6: partial(self._add_to_buffer, 6),
+                            7: partial(self._add_to_buffer, 7),
+                            8: partial(self._add_to_buffer, 8)}
         spawn = True
         while spawn:
             x = random.randrange(0, self.map_width)
