@@ -1,4 +1,5 @@
 import json
+import random
 
 import gym
 from gym import error, spaces, utils
@@ -38,7 +39,7 @@ class HouseholdEnv(gym.Env, EzPickle):
         self.map_height = 20
         self.map_width = 20
         self.scale = VIEWPORT_W / self.map_width
-        self.robot_pos = (0, 0)
+        self.robot_pos = (None, None)
 
         self.reset()
 
@@ -108,6 +109,13 @@ class HouseholdEnv(gym.Env, EzPickle):
                             5: self._move_down,
                             6: self._move_left,
                             7: self._move_right}
+        spawn = True
+        while spawn:
+            x = random.randrange(0, self.map_width)
+            y = random.randrange(0, self.map_height)
+            if (x, y) not in self.colliding_objects:
+                self.robot_pos = (x, y)
+                spawn = False
 
     def render(self, mode='human'):
         if self.viewer is None:
