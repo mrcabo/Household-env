@@ -6,16 +6,22 @@ This is a gym environment that represents a robot agent in a household environme
 
 The robot has a vision grid of 7x7. The vision grid inputs will return values that represent the content of that cell. 
 
+The tasks encoding is binary instead of label encoding (0: task1, 1: task2...) because there is no ordering for the
+ tasks, but the alg. might think there is.
+ 
+ **Note**: We could do the same for the vision grid, but then the observation space would increase a lot (48*3=147 for
+  for only 7 representable objects )
+
 Num   | Observation                |  Min   |  Max
 ------|----------------------------|--------|-------
 0     | x_coord_robot              |  0     |  1
 1     | y_coord_robot              |  0     |  1
-2     | order_encoding             |  0     |  1
+2     | task_encoding              |  0     |  1
 ..    | ..                         |  0     |  1
-6     | order_encoding             |  0     |  1
+6     | task_encoding              |  0     |  1
 7     | vision_grid                |  0     |  1
 ..    | ..                         |  0     |  1
-55    | vision_grid                |  0     |  1
+54    | vision_grid                |  0     |  1
 
 Objects will return the following values when within range of the 7x7 vision grid.
 
