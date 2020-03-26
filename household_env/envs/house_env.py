@@ -1,4 +1,6 @@
 import json
+from collections import namedtuple
+from enum import Enum
 from functools import partial
 import random
 
@@ -16,6 +18,28 @@ FPS = 60
 
 VIEWPORT_W = 600
 VIEWPORT_H = 600
+
+Rewards = namedtuple('Rewards', ['bump_into_wall',
+                                 'walking',
+                                 'turn_on_tv'])
+Reward = Rewards(-1, -0.01, 10)
+
+
+class Tasks(Enum):
+    TURN_ON_TV = 2
+    TURN_ON_DISHWASHER = 6
+
+    @staticmethod
+    def to_binary_list(x, vec_len=5):
+        res = [int(i) for i in bin(x)[2:]]
+        return np.pad(res, (vec_len - len(res), 0))
+
+    @staticmethod
+    def to_dec(x):
+        res = 0
+        for ele in x:
+            res = (res << 1) | ele
+        return res
 
 
 class ObjectColors:
@@ -41,16 +65,18 @@ class HouseholdEnv(gym.Env, EzPickle):
         self.map_height = 20
         self.map_width = 20
         self.scale = VIEWPORT_W / self.map_width
+        # observation space
         self.robot_pos = (None, None)
+        self.task_to_do = Tasks.to_binary_list(0)
+        self.vision_grid = np.zeros(48)
 
         self.reset()
 
         # Min-Max values for coordinates, order encoding, object id
-        low = np.hstack((np.zeros(2), np.zeros(5), np.zeros(49)))
-        high = np.hstack((np.array([19, 19]), np.ones(5), np.array([5] * 49)))
+        low = np.hstack((np.zeros(2), np.zeros(5), np.zeros(48)))
+        high = np.hstack((np.array([19, 19]), np.ones(5), np.array([5] * 48)))
         self.action_space = spaces.Discrete(8)
         self.observation_space = spaces.Box(low, high, dtype=np.int)
-        print("j")
 
     def __del__(self):
         pass
@@ -64,6 +90,11 @@ class HouseholdEnv(gym.Env, EzPickle):
             values = [tuple(x) for x in values]
             self.colliding_objects = self.colliding_objects.union(values)
         print(f"Occupied places are {self.colliding_objects}")  # TODO:debug only
+        with open('operability.json') as json_file:
+            aux = json.load(json_file)
+        self.operability = {}
+        for key in aux.keys():
+            self.operability[key] = [tuple(i) for i in aux[key]]
 
     def _move_up(self):
         x, y = self.robot_pos
@@ -86,18 +117,28 @@ class HouseholdEnv(gym.Env, EzPickle):
         return self._move(new_pos, restriction=new_pos[0] >= self.map_width)
 
     def _move(self, new_pos, restriction):
+        # When receiving a move order, it resets the buffer
+        self.action_buffer.clear()
         # Check if it collides with an object
         if new_pos in self.colliding_objects:
-            print("Tried to bump into object")  # TODO debug
-            return -1  # TODO: neg reward for bumping into object
+            return Reward.bump_into_wall
         if restriction:
-            print("Tried to bump into wall")  # TODO debug
-            return -1  # TODO: neg reward for bumping into wall
+            return Reward.bump_into_wall
         self.robot_pos = new_pos
-        return 0
+        return Reward.walking
 
     def _add_to_buffer(self, action):
         self.action_buffer.append(action)
+        return self._calculate_reward()
+
+    def _calculate_reward(self):
+        # task = self.state
+        # Reward for turning on TV
+        if (Tasks.to_dec(self.task_to_do) == Tasks.TURN_ON_TV.value) and (
+                self.robot_pos in self.operability['tv']) and (
+                self.action_buffer == [8]):
+            return Reward.turn_on_tv
+        return 0
 
     def seed(self, seed=None):
         self.np_random, seed = seeding.np_random(seed)
@@ -105,14 +146,15 @@ class HouseholdEnv(gym.Env, EzPickle):
 
     def step(self, action):
         assert self.action_space.contains(action), "%r (%s) invalid" % (action, type(action))
-        aux = self.action_dict[action]()
+        reward = self.action_dict[action]()
 
         # return np.array(state), reward, done, {}
-        return None, aux, False, {}
+        return None, reward, False, {}
 
     def reset(self):
         self.action_buffer = []
         self._generate_house()
+        # TODO: Maybe add reset_buffer action?
         self.action_dict = {0: self._move_up,
                             1: self._move_down,
                             2: self._move_left,
@@ -139,6 +181,11 @@ class HouseholdEnv(gym.Env, EzPickle):
         self._draw_objects()
 
         return self.viewer.render(return_rgb_array=mode == 'rgb_array')
+
+    def set_current_task(self, task):
+        if not isinstance(task, Tasks):
+            raise TypeError("task should be of the class type Tasks")
+        self.task_to_do = Tasks.to_binary_list(task.value)
 
     def close(self):
         if self.viewer is not None:
