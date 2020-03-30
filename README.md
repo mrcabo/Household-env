@@ -1,6 +1,19 @@
-# household-env
+# Household-env
 
 This is a gym environment that represents a robot agent in a household environment for RL purposes.
+
+## Table of Contents  
+[How to run it](#How to run it)  
+[Observation space](#Observation space)  
+[Action space](#Action space)  
+
+## How to run it
+
+To run an example of the environment first install it and then run the dummy file.
+```bash
+#!/bin/bash
+pip install -e Household-env 
+```
 
 ## Observation space
 
