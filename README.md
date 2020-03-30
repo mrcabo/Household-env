@@ -15,6 +15,7 @@ To run an example of the environment first install it and then run the dummy fil
 ```bash
 #!/bin/bash
 pip install -e Household-env 
+python3 dummy.py
 ```
 
 ## Observation space
