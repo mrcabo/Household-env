@@ -6,6 +6,7 @@ This is a gym environment that represents a robot agent in a household environme
 [How to run it](#how-to-run-it)  
 [Observation space](#observation-space)  
 [Action space](#action-space)
+[Tasks](#tasks)
 
 
 ## How to run it
@@ -66,3 +67,15 @@ Num   | Action                     |  Min   |  Max
 6     | (C) grasp                  |  0     |  1
 7     | (D) drop                   |  0     |  1
 8     | (E) push                   |  0     |  1
+
+## Tasks
+
+The tasks encoding is binary instead of label encoding (0: task1, 1: task2...) because there is no ordering for the
+ tasks, but the alg. might think there is. We currently use 5 units so up to 31 tasks.
+ 
+Num   | Action                     |  Binary encoded
+------|----------------------------|-----------------
+0     | No tasks                   |  00000
+1     | Turn on TV                 |  00001
+2     | Bring user a drink         |  00010
+3     | Make beds                  |  00011
