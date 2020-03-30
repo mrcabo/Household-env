@@ -5,7 +5,7 @@ This is a gym environment that represents a robot agent in a household environme
 #### Table of Contents  
 [How to run it](#how-to-run-it)  
 [Observation space](#observation-space)  
-[Action space](#action-space)
+[Action space](#action-space)  
 [Tasks](#tasks)
 
 
