@@ -83,11 +83,12 @@ class HouseholdEnv(gym.Env, EzPickle):
 
     def _generate_house(self):
         with open('house_objects.json') as json_file:
-            self.house_objects = json.load(json_file)
+            house_objects = json.load(json_file)
         # All the objects that the robot might collide with, so its easier to see if it can move without colliding
         self.colliding_objects = set()
-        for values in self.house_objects.values():
+        for key, values in house_objects.items():
             values = [tuple(x) for x in values]
+            self.house_objects[key] = values
             self.colliding_objects = self.colliding_objects.union(values)
         print(f"Occupied places are {self.colliding_objects}")  # TODO:debug only
         with open('operability.json') as json_file:
@@ -175,6 +176,7 @@ class HouseholdEnv(gym.Env, EzPickle):
 
     def reset(self):
         self.action_buffer = []
+        self.house_objects = {}
         self._generate_house()
         # TODO: Maybe add reset_buffer action?
         self.action_dict = {0: self._move_up,
