@@ -166,8 +166,8 @@ class HouseholdEnv(gym.Env, EzPickle):
                     if (x_grid, y_grid) in self.colliding_objects:
                         for key, val in self.house_objects.items():
                             if (x_grid, y_grid) in val:
-                                id = house_objects_id[key]
-                                fov.append(id)
+                                obj_id = house_objects_id[key]
+                                fov.append(obj_id)
                     else:
                         fov.append(0)
                 else:
