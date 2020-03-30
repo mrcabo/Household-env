@@ -2,10 +2,11 @@
 
 This is a gym environment that represents a robot agent in a household environment for RL purposes.
 
-## Table of Contents  
-[How to run it](#How to run it)  
-[Observation space](#Observation space)  
-[Action space](#Action space)  
+#### Table of Contents  
+[How to run it](#how-to-run-it)  
+[Observation space](#observation-space)  
+[Action space](#action-space)
+
 
 ## How to run it
 
