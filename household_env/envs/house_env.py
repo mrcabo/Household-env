@@ -24,6 +24,16 @@ Rewards = namedtuple('Rewards', ['bump_into_wall',
                                  'turn_on_tv'])
 Reward = Rewards(-1, -0.01, 10)
 
+house_objects_id = {'wall': 1, 'tv': 2, 'fridge': 3, 'couch': 4, 'person': 5, 'bed': 6, 'dishwasher': 7}
+
+
+def print_vision_grid(grid):
+    # DEBUG only - prints the vision grid in a squared format
+    bot = np.flip(np.reshape(grid[0:21], (3, 7)), 0)
+    mid = np.hstack((grid[21:24], np.array(-1), grid[24:27]))
+    top = np.flip(np.reshape(grid[27:], (3, 7)), 0)
+    print(np.vstack((top, mid, bot)))
+
 
 class Tasks(Enum):
     TURN_ON_TV = 2
@@ -150,15 +160,21 @@ class HouseholdEnv(gym.Env, EzPickle):
             for dx in offset:
                 if (dx == 0) and (dy == 0):
                     continue
-                # If vision square within range
                 x_grid, y_grid = x + dx, y + dy
                 if (x_grid >= 0) and (x_grid < self.map_width) and (y_grid >= 0) and (y_grid < self.map_height):
-                    # TODO: add the corresponding number
-                    aux = (x_grid, y_grid) in self.colliding_objects
-                    pass
+                    # First check on coll. obj. set should be faster than iterating through the dictionary every time
+                    if (x_grid, y_grid) in self.colliding_objects:
+                        for key, val in self.house_objects.items():
+                            if (x_grid, y_grid) in val:
+                                id = house_objects_id[key]
+                                fov.append(id)
+                    else:
+                        fov.append(0)
                 else:
-                    fov.append(0)
+                    fov.append(house_objects_id['wall'])  # Everything outside bounds is considered as a wall
+
         self.vision_grid = np.array(fov)
+        print_vision_grid(self.vision_grid)  # TODO: DEBUG only
 
     def seed(self, seed=None):
         self.np_random, seed = seeding.np_random(seed)

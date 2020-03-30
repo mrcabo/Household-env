@@ -28,11 +28,13 @@ Objects will return the following values when within range of the 7x7 vision gri
 Num   | Object
 ------|---------------
 0     | Nothing
-1     | TV
-2     | fridge
-3     | couch
-4     | person
-5     | bed
+1     | wall
+2     | TV
+3     | fridge
+4     | couch
+5     | person
+6     | bed
+7     | dishwasher
 
 ## Action space
 
