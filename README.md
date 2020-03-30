@@ -30,11 +30,11 @@ Num   | Object
 0     | Nothing
 1     | wall
 2     | TV
-3     | fridge
-4     | couch
-5     | person
-6     | bed
-7     | dishwasher
+3     | couch
+4     | bed
+5     | fridge
+6     | dishwasher
+7     | person
 
 ## Action space
 

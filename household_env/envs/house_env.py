@@ -24,8 +24,6 @@ Rewards = namedtuple('Rewards', ['bump_into_wall',
                                  'turn_on_tv'])
 Reward = Rewards(-1, -0.01, 10)
 
-house_objects_id = {'wall': 1, 'tv': 2, 'fridge': 3, 'couch': 4, 'person': 5, 'bed': 6, 'dishwasher': 7}
-
 
 def print_vision_grid(grid):
     # DEBUG only - prints the vision grid in a squared format
@@ -97,7 +95,8 @@ class HouseholdEnv(gym.Env, EzPickle):
         # All the objects that the robot might collide with, so its easier to see if it can move without colliding
         self.colliding_objects = set()
         for key, values in house_objects.items():
-            values = [tuple(x) for x in values]
+            self.house_objects_id[key] = values[0]
+            values = [tuple(x) for x in values[1:]]
             self.house_objects[key] = values
             self.colliding_objects = self.colliding_objects.union(values)
         print(f"Occupied places are {self.colliding_objects}")  # TODO:debug only
@@ -166,12 +165,12 @@ class HouseholdEnv(gym.Env, EzPickle):
                     if (x_grid, y_grid) in self.colliding_objects:
                         for key, val in self.house_objects.items():
                             if (x_grid, y_grid) in val:
-                                obj_id = house_objects_id[key]
+                                obj_id = self.house_objects_id[key]
                                 fov.append(obj_id)
                     else:
                         fov.append(0)
                 else:
-                    fov.append(house_objects_id['wall'])  # Everything outside bounds is considered as a wall
+                    fov.append(self.house_objects_id['wall'])  # Everything outside bounds is considered as a wall
 
         self.vision_grid = np.array(fov)
         print_vision_grid(self.vision_grid)  # TODO: DEBUG only
@@ -193,6 +192,7 @@ class HouseholdEnv(gym.Env, EzPickle):
     def reset(self):
         self.action_buffer = []
         self.house_objects = {}
+        self.house_objects_id = {}
         self._generate_house()
         # TODO: Maybe add reset_buffer action?
         self.action_dict = {0: self._move_up,
