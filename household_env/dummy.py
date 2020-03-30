@@ -11,6 +11,7 @@ env.set_current_task(tasks_list[0])
 
 for e in range(10):
     env.render()
-    _, aux, _, _ = env.step(env.action_space.sample())  # take a random action
+    _, aux, _, info = env.step(env.action_space.sample())  # take a random action
     print(f"Reward: {aux}")
+    print(info)
     time.sleep(0.1)

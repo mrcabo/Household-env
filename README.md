@@ -45,8 +45,8 @@ Num   | Action                     |  Min   |  Max
 1     | move_down                  |  0     |  1
 2     | move_left                  |  0     |  1
 3     | move_right                 |  0     |  1
-4     | extend_arm                 |  0     |  1
-5     | retract_arm                |  0     |  1
-6     | grasp                      |  0     |  1
-7     | drop                       |  0     |  1
-8     | push                       |  0     |  1
+4     | (A) extend_arm             |  0     |  1
+5     | (B) retract_arm            |  0     |  1
+6     | (C) grasp                  |  0     |  1
+7     | (D) drop                   |  0     |  1
+8     | (E) push                   |  0     |  1

@@ -66,7 +66,7 @@ class HouseholdEnv(gym.Env, EzPickle):
         self.map_width = 20
         self.scale = VIEWPORT_W / self.map_width
         # observation space
-        self.robot_pos = (None, None)
+        self.robot_pos = (0, 0)
         self.task_to_do = Tasks.to_binary_list(0)
         self.vision_grid = np.zeros(48)
 
@@ -137,8 +137,27 @@ class HouseholdEnv(gym.Env, EzPickle):
         if (Tasks.to_dec(self.task_to_do) == Tasks.TURN_ON_TV.value) and (
                 self.robot_pos in self.operability['tv']) and (
                 self.action_buffer == [8]):
+            self.action_buffer.clear()  # buffer clears after successful operation
             return Reward.turn_on_tv
         return 0
+
+    def _fill_vision_grid(self):
+        x, y = self.robot_pos
+        offset = [-3, -2, -1, 0, 1, 2, 3]
+        fov = []
+        for dy in offset:
+            for dx in offset:
+                if (dx == 0) and (dy == 0):
+                    continue
+                # If vision square within range
+                x_grid, y_grid = x + dx, y + dy
+                if (x_grid >= 0) and (x_grid < self.map_width) and (y_grid >= 0) and (y_grid < self.map_height):
+                    # TODO: add the corresponding number
+                    aux = (x_grid, y_grid) in self.colliding_objects
+                    pass
+                else:
+                    fov.append(0)
+        self.vision_grid = np.array(fov)
 
     def seed(self, seed=None):
         self.np_random, seed = seeding.np_random(seed)
@@ -148,8 +167,11 @@ class HouseholdEnv(gym.Env, EzPickle):
         assert self.action_space.contains(action), "%r (%s) invalid" % (action, type(action))
         reward = self.action_dict[action]()
 
+        self._fill_vision_grid()  # next state vision grid
+
+        task_done = True  # TODO:place there where it belongs
         # return np.array(state), reward, done, {}
-        return None, reward, False, {}
+        return None, reward, False, {'task_done': task_done}
 
     def reset(self):
         self.action_buffer = []
