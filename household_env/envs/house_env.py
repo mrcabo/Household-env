@@ -191,7 +191,7 @@ class HouseholdEnv(gym.Env, EzPickle):
 
         done = self.task_done
         n_actions = 4  # number of past actions remembered in the state
-        buf = np.pad(self.action_buffer,
+        buf = np.pad(np.asarray(self.action_buffer, dtype=int),
                      (0, n_actions - len(self.action_buffer)))
         if len(self.action_buffer) >= n_actions:
             done = True
@@ -204,7 +204,6 @@ class HouseholdEnv(gym.Env, EzPickle):
         self.house_objects = {}
         self.house_objects_id = {}
         self._generate_house()
-        # TODO: Maybe add reset_buffer action?
         self.action_dict = {0: self._move_up,
                             1: self._move_down,
                             2: self._move_left,
@@ -221,6 +220,8 @@ class HouseholdEnv(gym.Env, EzPickle):
             if (x, y) not in self.colliding_objects:
                 self.robot_pos = (x, y)
                 spawn = False
+
+        return np.hstack((self.robot_pos, self.task_to_do, np.zeros(4, dtype=int)))
 
     def render(self, mode='human'):
         if self.viewer is None:
