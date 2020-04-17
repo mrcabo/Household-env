@@ -10,8 +10,11 @@ env.reset()
 env.set_current_task(tasks_list[0])
 
 for e in range(10):
+    print(f"Epoch: {e}")
     env.render()
-    _, aux, _, info = env.step(env.action_space.sample())  # take a random action
+    next_state, aux, done, info = env.step(env.action_space.sample())  # take a random action
+    print(f"next_state: {next_state}")
     print(f"Reward: {aux}")
-    print(info)
+    if done:
+        break
     time.sleep(0.1)

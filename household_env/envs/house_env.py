@@ -21,8 +21,9 @@ VIEWPORT_H = 600
 
 Rewards = namedtuple('Rewards', ['bump_into_wall',
                                  'walking',
+                                 'take_action',
                                  'turn_on_tv'])
-Reward = Rewards(-1, -0.01, 10)
+Reward = Rewards(-1, -0.01, -0.02, 100)
 
 
 def print_vision_grid(grid):
@@ -127,8 +128,6 @@ class HouseholdEnv(gym.Env, EzPickle):
         return self._move(new_pos, restriction=new_pos[0] >= self.map_width)
 
     def _move(self, new_pos, restriction):
-        # When receiving a move order, it resets the buffer
-        self.action_buffer.clear()
         # Check if it collides with an object
         if new_pos in self.colliding_objects:
             return Reward.bump_into_wall
@@ -148,8 +147,9 @@ class HouseholdEnv(gym.Env, EzPickle):
                 self.robot_pos in self.operability['tv']) and (
                 self.action_buffer == [8]):
             self.action_buffer.clear()  # buffer clears after successful operation
+            self.task_done = True
             return Reward.turn_on_tv
-        return 0
+        return Reward.take_action
 
     def _fill_vision_grid(self):
         x, y = self.robot_pos
@@ -173,7 +173,7 @@ class HouseholdEnv(gym.Env, EzPickle):
                     fov.append(self.house_objects_id['wall'])  # Everything outside bounds is considered as a wall
 
         self.vision_grid = np.array(fov)
-        print_vision_grid(self.vision_grid)  # TODO: DEBUG only
+        # print_vision_grid(self.vision_grid)  # TODO: DEBUG only
 
     def seed(self, seed=None):
         self.np_random, seed = seeding.np_random(seed)
@@ -185,12 +185,18 @@ class HouseholdEnv(gym.Env, EzPickle):
 
         self._fill_vision_grid()  # next state vision grid
 
-        task_done = True  # TODO:place there where it belongs
-        # return np.array(state), reward, done, {}
-        return None, reward, False, {'task_done': task_done}
+        done = self.task_done
+        n_actions = 4  # number of past actions remembered in the state
+        buf = np.pad(self.action_buffer,
+                     (0, n_actions - len(self.action_buffer)))
+        if len(self.action_buffer) >= n_actions:
+            done = True
+        next_state = np.hstack((self.robot_pos, self.task_to_do, buf))
+        return next_state, reward, done, {}
 
     def reset(self):
         self.action_buffer = []
+        self.task_done = False
         self.house_objects = {}
         self.house_objects_id = {}
         self._generate_house()
