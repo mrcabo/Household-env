@@ -3,6 +3,7 @@ from collections import namedtuple
 from enum import Enum
 from functools import partial
 import random
+from pathlib import Path
 
 import numpy as np
 import gym
@@ -52,7 +53,8 @@ class Tasks(Enum):
 
 
 class ObjectColors:
-    with open('colors_house_objects.json') as json_file:
+    path = Path(__file__).parents[1] / 'colors_house_objects.json'
+    with open(path) as json_file:
         colors = json.load(json_file)
 
     @staticmethod
@@ -91,7 +93,8 @@ class HouseholdEnv(gym.Env, EzPickle):
         pass
 
     def _generate_house(self):
-        with open('house_objects.json') as json_file:
+        path = Path(__file__).parents[1] / 'house_objects.json'
+        with open(path) as json_file:
             house_objects = json.load(json_file)
         # All the objects that the robot might collide with, so its easier to see if it can move without colliding
         self.colliding_objects = set()
@@ -101,7 +104,8 @@ class HouseholdEnv(gym.Env, EzPickle):
             self.house_objects[key] = values
             self.colliding_objects = self.colliding_objects.union(values)
         print(f"Occupied places are {self.colliding_objects}")  # TODO:debug only
-        with open('operability.json') as json_file:
+        path = Path(__file__).parents[1] / 'operability.json'
+        with open(path) as json_file:
             aux = json.load(json_file)
         self.operability = {}
         for key in aux.keys():
