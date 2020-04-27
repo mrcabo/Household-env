@@ -105,7 +105,6 @@ class HouseholdEnv(gym.Env, EzPickle):
             values = [tuple(x) for x in values[1:]]
             self.house_objects[key] = values
             self.colliding_objects = self.colliding_objects.union(values)
-        print(f"Occupied places are {self.colliding_objects}")  # TODO:debug only
         path = Path(__file__).parents[1] / 'operability.json'
         with open(path) as json_file:
             aux = json.load(json_file)
