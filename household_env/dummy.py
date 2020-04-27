@@ -18,3 +18,5 @@ for e in range(10):
     if done:
         break
     time.sleep(0.1)
+
+env.close()
