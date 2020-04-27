@@ -33,7 +33,7 @@ Num   | Observation                |  Min   |  Max
 0     | x_coord_robot              |  0     |  19
 1     | y_coord_robot              |  0     |  19
 2     | task_encoding              |  0     |  1
-..    | ..                         |  0     |  1
+...   | ...                        |        |  
 6     | task_encoding              |  0     |  1
 7     | 1st action                 |  0     |  8
 8     | 2nd action                 |  0     |  8
