@@ -30,15 +30,15 @@ The tasks encoding is binary instead of label encoding (0: task1, 1: task2...) b
 
 Num   | Observation                |  Min   |  Max
 ------|----------------------------|--------|-------
-0     | x_coord_robot              |  0     |  1
-1     | y_coord_robot              |  0     |  1
+0     | x_coord_robot              |  0     |  19
+1     | y_coord_robot              |  0     |  19
 2     | task_encoding              |  0     |  1
 ..    | ..                         |  0     |  1
 6     | task_encoding              |  0     |  1
-7     | 1st action                 |  0     |  1
-8     | 2nd action                 |  0     |  1
-9     | 3rd action                 |  0     |  1
-10    | 4th action                 |  0     |  1
+7     | 1st action                 |  0     |  8
+8     | 2nd action                 |  0     |  8
+9     | 3rd action                 |  0     |  8
+10    | 4th action                 |  0     |  8
 (vision not yet)
 11    | vision_grid                |  0     |  1
 ..    | ..                         |  0     |  1
