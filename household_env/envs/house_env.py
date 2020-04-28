@@ -88,7 +88,7 @@ class HouseholdEnv(gym.Env, EzPickle):
         # high = np.hstack((np.array([19, 19]), np.ones(5), np.array([5] * 48)))
         low = np.hstack((np.zeros(2), np.zeros(5), np.zeros(4)))
         high = np.hstack((np.array([19, 19]), np.ones(5), np.array([8] * 4)))
-        self.action_space = spaces.Discrete(8)
+        self.action_space = spaces.Discrete(9)
         self.observation_space = spaces.Box(low, high, dtype=np.int)
 
     def __del__(self):
