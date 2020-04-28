@@ -80,7 +80,7 @@ class HouseholdEnv(gym.Env, EzPickle):
         self.robot_pos = (0, 0)
         self.task_to_do = Tasks.to_binary_list(0)
         self.vision_grid = np.zeros(48)
-
+        print("HPC version")
         self.reset()
 
         # Min-Max values for coordinates, order encoding, object id
