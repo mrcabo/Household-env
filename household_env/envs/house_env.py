@@ -153,6 +153,7 @@ class HouseholdEnv(gym.Env, EzPickle):
                 self.action_buffer == [8]):
             self.action_buffer.clear()  # buffer clears after successful operation
             self.task_done = True
+            print("TV turned ON!!!")
             return Reward.turn_on_tv
         return Reward.take_action
 
