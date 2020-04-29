@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name='householdenv',
-    version='0.0.2',
+    version='0.0.4',
     packages=setuptools.find_packages(),
     install_requires=["gym", "numpy"],  # And any other dependencies foo needs
     package_data={
