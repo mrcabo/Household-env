@@ -24,7 +24,7 @@ Rewards = namedtuple('Rewards', ['bump_into_wall',
                                  'walking',
                                  'take_action',
                                  'turn_on_tv'])
-Reward = Rewards(-1, -0.01, -0.02, 100)
+Reward = Rewards(-3., -.5, -.5, 300.)
 
 
 def print_vision_grid(grid):
@@ -139,7 +139,12 @@ class HouseholdEnv(gym.Env, EzPickle):
         if restriction:
             return Reward.bump_into_wall
         self.robot_pos = new_pos
-        return Reward.walking
+        rew = Reward.walking
+        if self.robot_pos in self.operability['tv']:
+            rew = Reward.turn_on_tv
+            print(f"Congrats!! You reached dest. reward: {rew}")
+            self.task_done = True
+        return rew
 
     def _add_to_buffer(self, action):
         self.action_buffer.append(action)
@@ -151,7 +156,6 @@ class HouseholdEnv(gym.Env, EzPickle):
         if (Tasks.to_dec(self.task_to_do) == Tasks.TURN_ON_TV.value) and (
                 self.robot_pos in self.operability['tv']) and (
                 self.action_buffer == [8]):
-            self.action_buffer.clear()  # buffer clears after successful operation
             self.task_done = True
             print("TV turned ON!!!")
             return Reward.turn_on_tv
