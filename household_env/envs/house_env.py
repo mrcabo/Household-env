@@ -84,10 +84,8 @@ class HouseholdEnv(gym.Env, EzPickle):
         self.reset()
 
         # Min-Max values for coordinates, order encoding, object id
-        # low = np.hstack((np.zeros(2), np.zeros(5), np.zeros(48)))
-        # high = np.hstack((np.array([19, 19]), np.ones(5), np.array([5] * 48)))
-        low = np.hstack((np.zeros(2), np.zeros(5), np.zeros(4)))
-        high = np.hstack((np.array([19, 19]), np.ones(5), np.array([8] * 4)))
+        low = np.zeros(2)
+        high = np.array([19, 19])
         self.action_space = spaces.Discrete(4)
         self.observation_space = spaces.Box(low, high, dtype=np.int)
 
@@ -201,7 +199,7 @@ class HouseholdEnv(gym.Env, EzPickle):
                      (0, n_actions - len(self.action_buffer)))
         if len(self.action_buffer) >= n_actions:
             done = True
-        next_state = np.hstack((self.robot_pos, self.task_to_do, buf))
+        next_state = np.array(self.robot_pos)
         return next_state, reward, done, {}
 
     def reset(self):
@@ -227,7 +225,7 @@ class HouseholdEnv(gym.Env, EzPickle):
                 self.robot_pos = (x, y)
                 spawn = False
 
-        return np.hstack((self.robot_pos, self.task_to_do, np.zeros(4, dtype=int)))
+        return np.asarray(self.robot_pos)
 
     # def render(self, mode='human'):
     #     if self.viewer is None:
