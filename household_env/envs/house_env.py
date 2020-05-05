@@ -84,9 +84,11 @@ class HouseholdEnv(gym.Env, EzPickle):
         self.reset()
 
         # Min-Max values for coordinates, order encoding, object id
-        low = np.zeros(2)
-        high = np.array([19, 19])
-        self.action_space = spaces.Discrete(4)
+        # low = np.hstack((np.zeros(2), np.zeros(5), np.zeros(48)))
+        # high = np.hstack((np.array([19, 19]), np.ones(5), np.array([5] * 48)))
+        low = np.hstack((np.zeros(2), np.zeros(5), np.zeros(4)))
+        high = np.hstack((np.array([19, 19]), np.ones(5), np.array([8] * 4)))
+        self.action_space = spaces.Discrete(9)
         self.observation_space = spaces.Box(low, high, dtype=np.int)
 
     def __del__(self):
@@ -137,12 +139,7 @@ class HouseholdEnv(gym.Env, EzPickle):
         if restriction:
             return Reward.bump_into_wall
         self.robot_pos = new_pos
-        rew = Reward.walking
-        if self.robot_pos in self.operability['tv']:
-            rew = Reward.turn_on_tv
-            print(f"Congrats!! You reached dest. reward: {rew}")
-            self.task_done = True
-        return rew
+        return Reward.walking
 
     def _add_to_buffer(self, action):
         self.action_buffer.append(action)
@@ -199,7 +196,7 @@ class HouseholdEnv(gym.Env, EzPickle):
                      (0, n_actions - len(self.action_buffer)))
         if len(self.action_buffer) >= n_actions:
             done = True
-        next_state = np.array(self.robot_pos)
+        next_state = np.hstack((self.robot_pos, self.task_to_do, buf))
         return next_state, reward, done, {}
 
     def reset(self):
@@ -225,7 +222,7 @@ class HouseholdEnv(gym.Env, EzPickle):
                 self.robot_pos = (x, y)
                 spawn = False
 
-        return np.asarray(self.robot_pos)
+        return np.hstack((self.robot_pos, self.task_to_do, np.zeros(4, dtype=int)))
 
     # def render(self, mode='human'):
     #     if self.viewer is None:
