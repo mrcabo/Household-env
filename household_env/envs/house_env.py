@@ -24,7 +24,7 @@ Rewards = namedtuple('Rewards', ['bump_into_wall',
                                  'walking',
                                  'take_action',
                                  'turn_on_tv'])
-Reward = Rewards(-3., -1., -1., 300.)
+Reward = Rewards(-3., -.5, -.5, 300.)
 
 
 def print_vision_grid(grid):
