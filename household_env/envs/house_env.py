@@ -23,7 +23,7 @@ VIEWPORT_H = 600
 Rewards = namedtuple('Rewards', ['bump_into_wall',
                                  'walking',
                                  'take_action',
-                                 'turn_on_tv'])
+                                 'completed_task'])
 Reward = Rewards(-3., -.5, -.5, 300.)
 
 
@@ -36,8 +36,17 @@ def print_vision_grid(grid):
 
 
 class Tasks(Enum):
-    TURN_ON_TV = 2
-    TURN_ON_DISHWASHER = 6
+    """
+    Tasks values are tuples that consist of the id, and the combination of actions
+    required to solve the task.
+    """
+    TURN_ON_TV = (1, [8])
+    CLEAN_TABLE = (2, 2)
+    CLEAN_STOVE = (3, 3)
+    MAKE_BED = (4, [4, 6, 4, 7])
+    DO_LAUNDRY = (5, 5)
+    PUT_DRYER = (6, 6)
+    PUT_DISHWASHER = (7, 7)
 
     @staticmethod
     def to_binary_list(x, vec_len=5):
@@ -148,12 +157,18 @@ class HouseholdEnv(gym.Env, EzPickle):
     def _calculate_reward(self):
         # task = self.state
         # Reward for turning on TV
-        if (Tasks.to_dec(self.task_to_do) == Tasks.TURN_ON_TV.value) and (
+        if (Tasks.to_dec(self.task_to_do) == Tasks.TURN_ON_TV.value[0]) and (
                 self.robot_pos in self.operability['tv']) and (
-                self.action_buffer == [8]):
+                self.action_buffer == Tasks.TURN_ON_TV.value[1]):
             self.task_done = True
             print("TV turned ON!!!")
-            return Reward.turn_on_tv
+            return Reward.completed_task
+        elif (Tasks.to_dec(self.task_to_do) == Tasks.MAKE_BED.value[0]) and (
+                self.robot_pos in self.operability['bed']) and (
+                self.action_buffer == Tasks.MAKE_BED.value[1]):
+            self.task_done = True
+            print("Made bed!!!")
+            return Reward.completed_task
         return Reward.take_action
 
     def _fill_vision_grid(self):
@@ -237,7 +252,7 @@ class HouseholdEnv(gym.Env, EzPickle):
     def set_current_task(self, task):
         if not isinstance(task, Tasks):
             raise TypeError("task should be of the class type Tasks")
-        self.task_to_do = Tasks.to_binary_list(task.value)
+        self.task_to_do = Tasks.to_binary_list(task.value[0])
 
     def close(self):
         if self.viewer is not None:
