@@ -38,7 +38,11 @@ Num   | Observation                |  Min   |  Max
 7     | 1st action                 |  0     |  8
 ...   | ...                        |  0     |  8
 13    | 7th action                 |  0     |  8
-      |(vision not yet implemented)|        | 
+
+(Vision not used yet) 
+
+Num   | Observation                |  Min   |  Max
+------|----------------------------|--------|-------
 14    | vision_grid                |  0     |  7
 ..    | ..                         |        |  
 61    | vision_grid                |  0     |  7
