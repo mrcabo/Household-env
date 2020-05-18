@@ -39,6 +39,9 @@ Num   | Observation                |  Min   |  Max
 8     | 2nd action                 |  0     |  8
 9     | 3rd action                 |  0     |  8
 10    | 4th action                 |  0     |  8
+11    | 5th action                 |  0     |  8
+12    | 6th action                 |  0     |  8
+13    | 7th action                 |  0     |  8
 (vision not yet)
 11    | vision_grid                |  0     |  1
 ..    | ..                         |  0     |  1
@@ -79,9 +82,13 @@ Num   | Action                     |  Min   |  Max
 The tasks encoding is binary instead of label encoding (0: task1, 1: task2...) because there is no ordering for the
  tasks, but the alg. might think there is. We currently use 5 units so up to 31 tasks.
  
-Num   | Action                     |  Binary encoded
+Num   | Action                     |  Action sequence
 ------|----------------------------|-----------------
-0     | No tasks                   |  00000
-1     | Turn on TV                 |  00001
-2     | Bring user a drink         |  00010
-3     | Make beds                  |  00011
+0     | No tasks                   |  -
+1     | Turn on TV                 |  E
+2     | Clean table                |  ABAB
+3     | Clean stove                |  ABAB
+4     | Make bed                   |  ACAD
+5     | Do laundry                 |  ACBADE
+6     | Put dryer                  |  ACBADE
+7     | Dishwasher                 |  ACBADEE
