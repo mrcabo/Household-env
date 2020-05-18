@@ -82,13 +82,13 @@ Num   | Action                     |  Min   |  Max
 The tasks encoding is binary instead of label encoding (0: task1, 1: task2...) because there is no ordering for the
  tasks, but the alg. might think there is. We currently use 5 units so up to 31 tasks.
  
-Num   | Action                     |  Binary encoded
+Num   | Action                     |  Action sequence
 ------|----------------------------|-----------------
-0     | No tasks                   |  00000
-1     | Turn on TV                 |  00001
-2     | Clean table                |  00010
-3     | Clean stove                |  00011
-4     | Make bed                   |  00100
-5     | Do laundry                 |  00101
-6     | Put dryer                  |  00110
-7     | Dishwasher                 |  00111
+0     | No tasks                   |  -
+1     | Turn on TV                 |  E
+2     | Clean table                |  ABAB
+3     | Clean stove                |  ABAB
+4     | Make bed                   |  ACAD
+5     | Do laundry                 |  ACBADE
+6     | Put dryer                  |  ACBADE
+7     | Dishwasher                 |  ACBADEE
