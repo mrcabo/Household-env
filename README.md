@@ -39,6 +39,9 @@ Num   | Observation                |  Min   |  Max
 8     | 2nd action                 |  0     |  8
 9     | 3rd action                 |  0     |  8
 10    | 4th action                 |  0     |  8
+11    | 5th action                 |  0     |  8
+12    | 6th action                 |  0     |  8
+13    | 7th action                 |  0     |  8
 (vision not yet)
 11    | vision_grid                |  0     |  1
 ..    | ..                         |  0     |  1
@@ -83,5 +86,9 @@ Num   | Action                     |  Binary encoded
 ------|----------------------------|-----------------
 0     | No tasks                   |  00000
 1     | Turn on TV                 |  00001
-2     | Bring user a drink         |  00010
-3     | Make beds                  |  00011
+2     | Clean table                |  00010
+3     | Clean stove                |  00011
+4     | Make bed                   |  00100
+5     | Do laundry                 |  00101
+6     | Put dryer                  |  00110
+7     | Dishwasher                 |  00111
