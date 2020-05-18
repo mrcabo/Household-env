@@ -162,13 +162,23 @@ class HouseholdEnv(gym.Env, EzPickle):
             self.task_done = True
             print("TV turned ON!!!")
             return Reward.completed_task
+
         # Reward for cleaning table
         elif (Tasks.to_dec(self.task_to_do) == Tasks.CLEAN_TABLE.value[0]) and (
                 self.robot_pos in self.operability['table']) and (
                 self.action_buffer == Tasks.CLEAN_TABLE.value[1]):
             self.task_done = True
-            print("TV turned ON!!!")
+            print("Table cleaned!!!")
             return Reward.completed_task
+
+        # Reward for cleaning stove
+        elif (Tasks.to_dec(self.task_to_do) == Tasks.CLEAN_STOVE.value[0]) and (
+                self.robot_pos in self.operability['stove']) and (
+                self.action_buffer == Tasks.CLEAN_STOVE.value[1]):
+            self.task_done = True
+            print("Stove cleaned!!!")
+            return Reward.completed_task
+
         # Reward for making the bed
         elif (Tasks.to_dec(self.task_to_do) == Tasks.MAKE_BED.value[0]) and (
                 self.robot_pos in self.operability['bed']) and (
@@ -176,12 +186,29 @@ class HouseholdEnv(gym.Env, EzPickle):
             self.task_done = True
             print("Made bed!!!")
             return Reward.completed_task
+
         # Reward for doing the laundry
         elif (Tasks.to_dec(self.task_to_do) == Tasks.DO_LAUNDRY.value[0]) and (
                 self.robot_pos in self.operability['washing_M']) and (
                 self.action_buffer == Tasks.DO_LAUNDRY.value[1]):
             self.task_done = True
             print("Laundry done!!!")
+            return Reward.completed_task
+
+        # Reward for putting the dryer
+        elif (Tasks.to_dec(self.task_to_do) == Tasks.PUT_DRYER.value[0]) and (
+                self.robot_pos in self.operability['dryer']) and (
+                self.action_buffer == Tasks.PUT_DRYER.value[1]):
+            self.task_done = True
+            print("Dryer put!!!")
+            return Reward.completed_task
+
+        # Reward for putting the dryer
+        elif (Tasks.to_dec(self.task_to_do) == Tasks.PUT_DISHWASHER.value[0]) and (
+                self.robot_pos in self.operability['dishwasher']) and (
+                self.action_buffer == Tasks.PUT_DISHWASHER.value[1]):
+            self.task_done = True
+            print("Dishwasher put!!!")
             return Reward.completed_task
 
         # If nothing else
