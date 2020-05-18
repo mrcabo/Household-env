@@ -36,16 +36,12 @@ Num   | Observation                |  Min   |  Max
 ...   | ...                        |        |  
 6     | task_encoding              |  0     |  1
 7     | 1st action                 |  0     |  8
-8     | 2nd action                 |  0     |  8
-9     | 3rd action                 |  0     |  8
-10    | 4th action                 |  0     |  8
-11    | 5th action                 |  0     |  8
-12    | 6th action                 |  0     |  8
+...   | ...                        |  0     |  8
 13    | 7th action                 |  0     |  8
-(vision not yet)
-11    | vision_grid                |  0     |  1
-..    | ..                         |  0     |  1
-58    | vision_grid                |  0     |  1
+      |(vision not yet implemented)|        | 
+14    | vision_grid                |  0     |  7
+..    | ..                         |        |  
+61    | vision_grid                |  0     |  7
 
 Objects will return the following values when within range of the 7x7 vision grid.
 
