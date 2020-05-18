@@ -3,10 +3,10 @@ from household_env.envs.house_env import Tasks
 import gym
 import time
 
-tasks_list = [Tasks.TURN_ON_TV, Tasks.TURN_ON_DISHWASHER]
+tasks_list = [Tasks.TURN_ON_TV, Tasks.MAKE_BED]
 
 env = gym.make('household_env:Household-v0')
-env.set_current_task(tasks_list[0])
+env.set_current_task(Tasks.MAKE_BED)
 x = 0
 while x != -1:
     state = env.reset()
@@ -22,6 +22,6 @@ while x != -1:
         state = next_state
         env.render()
         print(f"next_state: {next_state}, Reward: {reward}, Done: {done}")
-    print("End of episode")
+    print("End of episode\n")
 
 env.close()
