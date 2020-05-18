@@ -41,12 +41,12 @@ class Tasks(Enum):
     required to solve the task.
     """
     TURN_ON_TV = (1, [8])
-    CLEAN_TABLE = (2, 2)
-    CLEAN_STOVE = (3, 3)
+    CLEAN_TABLE = (2, [4, 5, 4, 5])
+    CLEAN_STOVE = (3, [4, 5, 4, 5])
     MAKE_BED = (4, [4, 6, 4, 7])
-    DO_LAUNDRY = (5, 5)
-    PUT_DRYER = (6, 6)
-    PUT_DISHWASHER = (7, 7)
+    DO_LAUNDRY = (5, [4, 6, 5, 4, 7, 8])
+    PUT_DRYER = (6, [4, 6, 5, 4, 7, 8])
+    PUT_DISHWASHER = (7, [4, 6, 5, 4, 7, 8, 8])
 
     @staticmethod
     def to_binary_list(x, vec_len=5):
@@ -95,8 +95,8 @@ class HouseholdEnv(gym.Env, EzPickle):
         # Min-Max values for coordinates, order encoding, object id
         # low = np.hstack((np.zeros(2), np.zeros(5), np.zeros(48)))
         # high = np.hstack((np.array([19, 19]), np.ones(5), np.array([5] * 48)))
-        low = np.hstack((np.zeros(2), np.zeros(5), np.zeros(4)))
-        high = np.hstack((np.array([19, 19]), np.ones(5), np.array([8] * 4)))
+        low = np.hstack((np.zeros(2), np.zeros(5), np.zeros(7)))
+        high = np.hstack((np.array([19, 19]), np.ones(5), np.array([8] * 7)))
         self.action_space = spaces.Discrete(9)
         self.observation_space = spaces.Box(low, high, dtype=np.int)
 
@@ -155,7 +155,6 @@ class HouseholdEnv(gym.Env, EzPickle):
         return self._calculate_reward()
 
     def _calculate_reward(self):
-        # task = self.state
         # Reward for turning on TV
         if (Tasks.to_dec(self.task_to_do) == Tasks.TURN_ON_TV.value[0]) and (
                 self.robot_pos in self.operability['tv']) and (
@@ -163,12 +162,29 @@ class HouseholdEnv(gym.Env, EzPickle):
             self.task_done = True
             print("TV turned ON!!!")
             return Reward.completed_task
+        # Reward for cleaning table
+        elif (Tasks.to_dec(self.task_to_do) == Tasks.CLEAN_TABLE.value[0]) and (
+                self.robot_pos in self.operability['table']) and (
+                self.action_buffer == Tasks.CLEAN_TABLE.value[1]):
+            self.task_done = True
+            print("TV turned ON!!!")
+            return Reward.completed_task
+        # Reward for making the bed
         elif (Tasks.to_dec(self.task_to_do) == Tasks.MAKE_BED.value[0]) and (
                 self.robot_pos in self.operability['bed']) and (
                 self.action_buffer == Tasks.MAKE_BED.value[1]):
             self.task_done = True
             print("Made bed!!!")
             return Reward.completed_task
+        # Reward for doing the laundry
+        elif (Tasks.to_dec(self.task_to_do) == Tasks.DO_LAUNDRY.value[0]) and (
+                self.robot_pos in self.operability['washing_M']) and (
+                self.action_buffer == Tasks.DO_LAUNDRY.value[1]):
+            self.task_done = True
+            print("Laundry done!!!")
+            return Reward.completed_task
+
+        # If nothing else
         return Reward.take_action
 
     def _fill_vision_grid(self):
@@ -206,7 +222,7 @@ class HouseholdEnv(gym.Env, EzPickle):
         self._fill_vision_grid()  # next state vision grid
 
         done = self.task_done
-        n_actions = 4  # number of past actions remembered in the state
+        n_actions = 7  # number of past actions remembered in the state
         buf = np.pad(np.asarray(self.action_buffer, dtype=int),
                      (0, n_actions - len(self.action_buffer)))
         if len(self.action_buffer) >= n_actions:
@@ -237,7 +253,7 @@ class HouseholdEnv(gym.Env, EzPickle):
                 self.robot_pos = (x, y)
                 spawn = False
 
-        return np.hstack((self.robot_pos, self.task_to_do, np.zeros(4, dtype=int)))
+        return np.hstack((self.robot_pos, self.task_to_do, np.zeros(7, dtype=int)))
 
     def render(self, mode='human'):
         if self.viewer is None:
