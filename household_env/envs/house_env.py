@@ -238,6 +238,12 @@ class HouseholdEnv(gym.Env, EzPickle):
         self.vision_grid = np.array(fov)
         # print_vision_grid(self.vision_grid)  # TODO: DEBUG only
 
+    def set_position(self, pos):
+        if tuple(pos) not in self.colliding_objects:
+            self.robot_pos = tuple(pos)
+        else:
+            raise Exception("Indicated position is not reachable.")
+
     def seed(self, seed=None):
         self.np_random, seed = seeding.np_random(seed)
         return [seed]
