@@ -92,12 +92,10 @@ class HouseholdEnv(gym.Env, EzPickle):
 
         self.reset()
 
-        # Min-Max values for coordinates, order encoding, object id
-        # low = np.hstack((np.zeros(2), np.zeros(5), np.zeros(48)))
-        # high = np.hstack((np.array([19, 19]), np.ones(5), np.array([5] * 48)))
-        low = np.hstack((np.zeros(2), np.zeros(5), np.zeros(7)))
-        high = np.hstack((np.array([19, 19]), np.ones(5), np.array([8] * 7)))
-        self.action_space = spaces.Discrete(9)
+        # Min-Max values for states
+        low = np.hstack((np.zeros(10), np.zeros(5)))
+        high = np.hstack((np.array([19, 19]), np.ones(13)))
+        self.action_space = spaces.Discrete(16)
         self.observation_space = spaces.Box(low, high, dtype=np.int)
 
     def __del__(self):
@@ -280,13 +278,14 @@ class HouseholdEnv(gym.Env, EzPickle):
                             8: partial(self._add_to_buffer, 8)}
         spawn = True
         while spawn:
-            x = random.randrange(0, self.map_width)
-            y = random.randrange(0, self.map_height)
+            # Only spawn in the kitchen for the moment
+            x = random.randrange(11, self.map_width)
+            y = random.randrange(14, self.map_height)
             if (x, y) not in self.colliding_objects:
                 self.robot_pos = (x, y)
                 spawn = False
 
-        return np.hstack((self.robot_pos, self.task_to_do, np.zeros(7, dtype=int)))
+        return np.hstack((self.robot_pos, np.zeros(8, dtype=int), self.task_to_do))
 
     def render(self, mode='human'):
         if self.viewer is None:
