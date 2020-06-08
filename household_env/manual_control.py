@@ -13,7 +13,9 @@ while x != -1:
     env.render()
     done = False
     while not done:
-        print(f"Current state: {state}")
+        states_names = ['PosX', 'PosY'] + list(env.env.states.keys()) + ['task_enc']
+        print(f"\nCurrent state: {state}")
+        print(states_names)
         x = int(input("Enter your command: "))
         if x < 0 or x > 8:
             print("Input should be between 0 and 8")
@@ -22,6 +24,6 @@ while x != -1:
         state = next_state
         env.render()
         print(f"next_state: {next_state}, Reward: {reward}, Done: {done}")
-    print("End of episode\n")
+    print("End of episode\n\n")
 
 env.close()

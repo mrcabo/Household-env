@@ -89,7 +89,8 @@ class HouseholdEnv(gym.Env, EzPickle):
         self.robot_pos = (0, 0)
         self.task_to_do = Tasks.to_binary_list(0)
         self.vision_grid = np.zeros(48)
-
+        self.states = {'cabinet_open': 0, 'has_tea': 0, 'has_soup_jar': 0, 'fire_on': 0, 'tap_open': 0,
+                       'holding_saucepan': 0, 'saucepan_full': 0, 'heated_up': 0}
         self.reset()
 
         # Min-Max values for states
@@ -276,6 +277,10 @@ class HouseholdEnv(gym.Env, EzPickle):
                             6: partial(self._add_to_buffer, 6),
                             7: partial(self._add_to_buffer, 7),
                             8: partial(self._add_to_buffer, 8)}
+
+        for key in self.states.keys():
+            self.states[key] = 0
+
         spawn = True
         while spawn:
             # Only spawn in the kitchen for the moment
@@ -285,7 +290,7 @@ class HouseholdEnv(gym.Env, EzPickle):
                 self.robot_pos = (x, y)
                 spawn = False
 
-        return np.hstack((self.robot_pos, np.zeros(8, dtype=int), self.task_to_do))
+        return np.hstack((self.robot_pos, list(self.states.values()), self.task_to_do))
 
     def render(self, mode='human'):
         if self.viewer is None:
