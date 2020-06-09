@@ -22,9 +22,9 @@ VIEWPORT_H = 600
 
 Rewards = namedtuple('Rewards', ['bump_into_wall',
                                  'walking',
-                                 'take_action',
+                                 'failed_action',
                                  'completed_task'])
-Reward = Rewards(-3., -.5, -.5, 300.)
+Reward = Rewards(-3., -.1, -1, 100.)
 
 
 def print_vision_grid(grid):
@@ -40,13 +40,8 @@ class Tasks(Enum):
     Tasks values are tuples that consist of the id, and the combination of actions
     required to solve the task.
     """
-    TURN_ON_TV = (1, [8])
-    CLEAN_TABLE = (2, [4, 5, 4, 5])
-    CLEAN_STOVE = (3, [4, 5, 4, 5])
-    MAKE_BED = (4, [4, 6, 4, 7])
-    DO_LAUNDRY = (5, [4, 6, 5, 4, 7, 8])
-    PUT_DRYER = (6, [4, 6, 5, 4, 7, 8])
-    PUT_DISHWASHER = (7, [4, 6, 5, 4, 7, 8, 8])
+    MAKE_TEA = 1
+    MAKE_SOUP = 2
 
     @staticmethod
     def to_binary_list(x, vec_len=5):
@@ -90,7 +85,7 @@ class HouseholdEnv(gym.Env, EzPickle):
         self.task_to_do = Tasks.to_binary_list(0)
         self.vision_grid = np.zeros(48)
         self.states = {'cabinet_open': 0, 'has_tea': 0, 'has_soup_jar': 0, 'fire_on': 0, 'tap_open': 0,
-                       'holding_saucepan': 0, 'saucepan_full': 0, 'heated_up': 0}
+                       'holding_saucepan': 0, 'saucepan_full': 0, 'heated_up': 0, 'has_boiling_water': 0}
         self.reset()
 
         # Min-Max values for states
@@ -149,69 +144,101 @@ class HouseholdEnv(gym.Env, EzPickle):
         self.robot_pos = new_pos
         return Reward.walking
 
-    def _add_to_buffer(self, action):
-        self.action_buffer.append(action)
-        return self._calculate_reward()
+    def _open_door(self):
+        if (self.robot_pos in self.operability['cabinet']) and not self.states['cabinet_open']:
+            self.states['cabinet_open'] = 1
+        else:
+            return Reward.failed_action
+        return 0
 
-    def _calculate_reward(self):
-        # Reward for turning on TV
-        if (Tasks.to_dec(self.task_to_do) == Tasks.TURN_ON_TV.value[0]) and (
-                self.robot_pos in self.operability['tv']) and (
-                self.action_buffer == Tasks.TURN_ON_TV.value[1]):
+    def _close_door(self):
+        if (self.robot_pos in self.operability['cabinet']) and self.states['cabinet_open']:
+            self.states['cabinet_open'] = 0
+        else:
+            return Reward.failed_action
+        return 0
+
+    def _get_tea(self):
+        if self.robot_pos in self.operability['cabinet'] and not self.states['has_tea'] and self.states['cabinet_open']:
+            self.states['has_tea'] = 1
+        else:
+            return Reward.failed_action
+        return 0
+
+    def _get_soup_jar(self):
+        if self.robot_pos in self.operability['cabinet'] and not self.states['has_soup_jar'] and self.states[
+            'cabinet_open']:
+            self.states['has_soup_jar'] = 1
+        else:
+            return Reward.failed_action
+        return 0
+
+    def _get_saucepan(self):
+        if (self.robot_pos in self.operability['sink']) and not self.states['holding_saucepan']:
+            self.states['holding_saucepan'] = 1
+        else:
+            return Reward.failed_action
+        return 0
+
+    def _turn_on_heat(self):
+        if (self.robot_pos in self.operability['stove']) and not self.states['fire_on']:
+            self.states['fire_on'] = 1
+        else:
+            return Reward.failed_action
+        return 0
+
+    def _turn_off_heat(self):
+        if self.robot_pos in self.operability['stove'] and self.states['fire_on']:
+            self.states['fire_on'] = 0
+        else:
+            return Reward.failed_action
+        return 0
+
+    def _heat_up(self):
+        if (self.robot_pos in self.operability['stove'] and self.states['fire_on'] and not self.states['heated_up']
+                and self.states['saucepan_full']):
+
+            self.states['heated_up'] = 1
+            if Tasks.to_dec(self.task_to_do) == Tasks.MAKE_TEA.value:
+                self.states['has_boiling_water'] = 1
+            elif Tasks.to_dec(self.task_to_do) == Tasks.MAKE_SOUP.value:
+                self.task_done = True
+        else:
+            return Reward.failed_action
+        return 0
+
+    def _fill(self):
+        cond_tea = (Tasks.to_dec(self.task_to_do) == Tasks.MAKE_TEA.value and
+                    self.robot_pos in self.operability['sink'] and self.states['holding_saucepan'] and
+                    not self.states['saucepan_full'] and self.states['tap_open'])
+        cond_soup = (Tasks.to_dec(self.task_to_do) == Tasks.MAKE_SOUP.value and self.states['holding_saucepan'] and
+                     not self.states['saucepan_full'] and self.states['has_soup_jar'])
+        if cond_tea or cond_soup:
+            self.states['saucepan_full'] = 1
+        else:
+            return Reward.failed_action
+        return 0
+
+    def _open_tap(self):
+        if (self.robot_pos in self.operability['sink']) and not self.states['tap_open']:
+            self.states['tap_open'] = 1
+        else:
+            return Reward.failed_action
+        return 0
+
+    def _close_tap(self):
+        if (self.robot_pos in self.operability['sink']) and self.states['tap_open']:
+            self.states['tap_open'] = 0
+        else:
+            return Reward.failed_action
+        return 0
+
+    def _mix(self):
+        if self.states['has_tea'] and self.states['has_boiling_water']:
             self.task_done = True
-            print("TV turned ON!!!")
-            return Reward.completed_task
-
-        # Reward for cleaning table
-        elif (Tasks.to_dec(self.task_to_do) == Tasks.CLEAN_TABLE.value[0]) and (
-                self.robot_pos in self.operability['table']) and (
-                self.action_buffer == Tasks.CLEAN_TABLE.value[1]):
-            self.task_done = True
-            print("Table cleaned!!!")
-            return Reward.completed_task
-
-        # Reward for cleaning stove
-        elif (Tasks.to_dec(self.task_to_do) == Tasks.CLEAN_STOVE.value[0]) and (
-                self.robot_pos in self.operability['stove']) and (
-                self.action_buffer == Tasks.CLEAN_STOVE.value[1]):
-            self.task_done = True
-            print("Stove cleaned!!!")
-            return Reward.completed_task
-
-        # Reward for making the bed
-        elif (Tasks.to_dec(self.task_to_do) == Tasks.MAKE_BED.value[0]) and (
-                self.robot_pos in self.operability['bed']) and (
-                self.action_buffer == Tasks.MAKE_BED.value[1]):
-            self.task_done = True
-            print("Made bed!!!")
-            return Reward.completed_task
-
-        # Reward for doing the laundry
-        elif (Tasks.to_dec(self.task_to_do) == Tasks.DO_LAUNDRY.value[0]) and (
-                self.robot_pos in self.operability['washing_M']) and (
-                self.action_buffer == Tasks.DO_LAUNDRY.value[1]):
-            self.task_done = True
-            print("Laundry done!!!")
-            return Reward.completed_task
-
-        # Reward for putting the dryer
-        elif (Tasks.to_dec(self.task_to_do) == Tasks.PUT_DRYER.value[0]) and (
-                self.robot_pos in self.operability['dryer']) and (
-                self.action_buffer == Tasks.PUT_DRYER.value[1]):
-            self.task_done = True
-            print("Dryer put!!!")
-            return Reward.completed_task
-
-        # Reward for putting the dryer
-        elif (Tasks.to_dec(self.task_to_do) == Tasks.PUT_DISHWASHER.value[0]) and (
-                self.robot_pos in self.operability['dishwasher']) and (
-                self.action_buffer == Tasks.PUT_DISHWASHER.value[1]):
-            self.task_done = True
-            print("Dishwasher put!!!")
-            return Reward.completed_task
-
-        # If nothing else
-        return Reward.take_action
+        else:
+            return Reward.failed_action
+        return 0
 
     def _fill_vision_grid(self):
         x, y = self.robot_pos
@@ -250,21 +277,32 @@ class HouseholdEnv(gym.Env, EzPickle):
     def step(self, action):
         assert self.action_space.contains(action), "%r (%s) invalid" % (action, type(action))
         reward = self.action_dict[action]()
+        done = False
 
-        self._fill_vision_grid()  # next state vision grid
+        # Check if all the requirements are fulfilled for the specified task
+        if self.task_done:
+            # Make tea
+            if (Tasks.to_dec(self.task_to_do) == Tasks.MAKE_TEA.value and
+                    not self.states['cabinet_open'] and not self.states['fire_on'] and not self.states['tap_open']):
+                print("TEA, you just made tea!!!")
+                done = True
+                reward = Reward.completed_task
+            # Make soup
+            elif (Tasks.to_dec(self.task_to_do) == Tasks.MAKE_SOUP.value and
+                  not self.states['cabinet_open'] and not self.states['fire_on']):
+                # TODO: should i put not self.states['tap_open'] ?? it'd be nice
+                print("SOUP, you just made soup!!!")
+                done = True
+                reward = Reward.completed_task
 
-        done = self.task_done
-        n_actions = 7  # number of past actions remembered in the state
-        buf = np.pad(np.asarray(self.action_buffer, dtype=int),
-                     (0, n_actions - len(self.action_buffer)))
-        if len(self.action_buffer) >= n_actions:
-            done = True
-        next_state = np.hstack((self.robot_pos, self.task_to_do, buf))
+        # self._fill_vision_grid()  # next state vision grid
+
+        next_state = np.hstack((self.robot_pos, list(self.states.values()), self.task_to_do))
         return next_state, reward, done, {}
 
     def reset(self):
-        self.action_buffer = []
-        self.task_done = False
+        self.task_done = False  # Indicates that the task is done, but there might be more actions needed to get the
+        # reward (e.g. fire is still on)
         self.house_objects = {}
         self.house_objects_id = {}
         self._generate_house()
@@ -272,11 +310,18 @@ class HouseholdEnv(gym.Env, EzPickle):
                             1: self._move_down,
                             2: self._move_left,
                             3: self._move_right,
-                            4: partial(self._add_to_buffer, 4),
-                            5: partial(self._add_to_buffer, 5),
-                            6: partial(self._add_to_buffer, 6),
-                            7: partial(self._add_to_buffer, 7),
-                            8: partial(self._add_to_buffer, 8)}
+                            4: self._open_door,
+                            5: self._close_door,
+                            6: self._get_tea,
+                            7: self._get_soup_jar,
+                            8: self._get_saucepan,
+                            9: self._turn_on_heat,
+                            10: self._turn_off_heat,
+                            11: self._heat_up,
+                            12: self._fill,
+                            13: self._open_tap,
+                            14: self._close_tap,
+                            15: self._mix}
 
         for key in self.states.keys():
             self.states[key] = 0
@@ -305,7 +350,7 @@ class HouseholdEnv(gym.Env, EzPickle):
     def set_current_task(self, task):
         if not isinstance(task, Tasks):
             raise TypeError("task should be of the class type Tasks")
-        self.task_to_do = Tasks.to_binary_list(task.value[0])
+        self.task_to_do = Tasks.to_binary_list(task.value)
 
     def close(self):
         if self.viewer is not None:

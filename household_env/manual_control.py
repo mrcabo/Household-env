@@ -3,27 +3,28 @@ from household_env.envs.house_env import Tasks
 import gym
 import time
 
-tasks_list = [Tasks.TURN_ON_TV, Tasks.MAKE_BED]
+tasks_list = [Tasks.MAKE_TEA, Tasks.MAKE_SOUP]
 
 env = gym.make('household_env:Household-v0')
-env.set_current_task(Tasks.MAKE_BED)
+env.set_current_task(Tasks.MAKE_TEA)
 x = 0
 while x != -1:
     state = env.reset()
     env.render()
     done = False
     while not done:
-        states_names = ['PosX', 'PosY'] + list(env.env.states.keys()) + ['task_enc']
         print(f"\nCurrent state: {state}")
-        print(states_names)
+        print(env.env.states)
         x = int(input("Enter your command: "))
-        if x < 0 or x > 8:
-            print("Input should be between 0 and 8")
+        if x < 0 or x > 15:
+            print("Input should be between 0 and 15")
             break
         next_state, reward, done, info = env.step(x)  # take a random action
         state = next_state
         env.render()
-        print(f"next_state: {next_state}, Reward: {reward}, Done: {done}")
+        # print(f"Next_state: {next_state}")
+        print(f"Reward: {reward}, Done: {done}")
+        print(f"Done: {done}")
     print("End of episode\n\n")
 
 env.close()
