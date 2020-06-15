@@ -89,8 +89,8 @@ class HouseholdEnv(gym.Env, EzPickle):
         self.reset()
 
         # Min-Max values for states
-        low = np.hstack((np.zeros(10), np.zeros(5)))
-        high = np.hstack((np.array([19, 19]), np.ones(13)))
+        low = np.hstack((np.zeros(11), np.zeros(5)))
+        high = np.hstack((np.array([19, 19]), np.ones(14)))
         self.action_space = spaces.Discrete(16)
         self.observation_space = spaces.Box(low, high, dtype=np.int)
 
@@ -302,6 +302,7 @@ class HouseholdEnv(gym.Env, EzPickle):
 
     def reset(self):
         self.task_done = False  # Indicates that the task is done, but there might be more actions needed to get the
+        self.task_to_do = Tasks.to_binary_list(0)
         # reward (e.g. fire is still on)
         self.house_objects = {}
         self.house_objects_id = {}
