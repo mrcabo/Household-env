@@ -6,10 +6,10 @@ import time
 tasks_list = [Tasks.MAKE_TEA, Tasks.MAKE_SOUP]
 
 env = gym.make('household_env:Household-v0')
-env.set_current_task(Tasks.MAKE_TEA)
 x = 0
 while x != -1:
     state = env.reset()
+    env.set_current_task(Tasks.MAKE_TEA)
     env.render()
     done = False
     while not done:

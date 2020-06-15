@@ -86,6 +86,23 @@ class HouseholdEnv(gym.Env, EzPickle):
         self.vision_grid = np.zeros(48)
         self.states = {'cabinet_open': 0, 'has_tea': 0, 'has_soup_jar': 0, 'fire_on': 0, 'tap_open': 0,
                        'holding_saucepan': 0, 'saucepan_full': 0, 'heated_up': 0, 'has_boiling_water': 0}
+
+        self.action_dict = {0: self._move_up,
+                            1: self._move_down,
+                            2: self._move_left,
+                            3: self._move_right,
+                            4: self._open_door,
+                            5: self._close_door,
+                            6: self._get_tea,
+                            7: self._get_soup_jar,
+                            8: self._get_saucepan,
+                            9: self._turn_on_heat,
+                            10: self._turn_off_heat,
+                            11: self._heat_up,
+                            12: self._fill,
+                            13: self._open_tap,
+                            14: self._close_tap,
+                            15: self._mix}
         self.reset()
 
         # Min-Max values for states
@@ -307,22 +324,6 @@ class HouseholdEnv(gym.Env, EzPickle):
         self.house_objects = {}
         self.house_objects_id = {}
         self._generate_house()
-        self.action_dict = {0: self._move_up,
-                            1: self._move_down,
-                            2: self._move_left,
-                            3: self._move_right,
-                            4: self._open_door,
-                            5: self._close_door,
-                            6: self._get_tea,
-                            7: self._get_soup_jar,
-                            8: self._get_saucepan,
-                            9: self._turn_on_heat,
-                            10: self._turn_off_heat,
-                            11: self._heat_up,
-                            12: self._fill,
-                            13: self._open_tap,
-                            14: self._close_tap,
-                            15: self._mix}
 
         for key in self.states.keys():
             self.states[key] = 0
