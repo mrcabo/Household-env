@@ -362,6 +362,7 @@ class HouseholdEnv(gym.Env, EzPickle):
         if not isinstance(task, Tasks):
             raise TypeError("task should be of the class type Tasks")
         self.task_to_do = Tasks.to_binary_list(task.value)
+        return np.hstack((self.robot_pos, list(self.states.values()), self.task_to_do))
 
     def close(self):
         if self.viewer is not None:
