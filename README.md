@@ -2,6 +2,13 @@
 
 This is a gym environment that represents a robot agent in a household environment for RL purposes.
 
+A blueprint of the household.
+![Blueprint of environment](https://github.com/mrcabo/Household-env/blob/master/household_blueprint.jpg)
+
+And the approximation done as a gym-like environment
+![Image of environment](https://github.com/mrcabo/Household-env/blob/master/env_img.png)
+
+
 #### Table of Contents  
 [How to run it](#how-to-run-it)  
 [Observation space](#observation-space)  
