@@ -146,6 +146,9 @@ class HouseholdEnv(gym.Env, EzPickle):
     def _move_left(self):
         x, y = self.robot_pos
         new_pos = (x - 1, y)
+        # Just for reducing search space
+        if new_pos[0] < 11:
+            return Reward.bump_into_wall
         return self._move(new_pos, restriction=new_pos[0] < 0)
 
     def _move_right(self):
