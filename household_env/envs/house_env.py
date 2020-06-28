@@ -168,7 +168,7 @@ class HouseholdEnv(gym.Env, EzPickle):
     def _open_door(self):
         if (self.robot_pos in self.operability['cabinet']) and not self.states['cabinet_open']:
             self.states['cabinet_open'] = 1
-            print("Door opened.")
+            # print("Door opened.")
         else:
             return Reward.failed_action
         return 0
@@ -176,7 +176,7 @@ class HouseholdEnv(gym.Env, EzPickle):
     def _close_door(self):
         if (self.robot_pos in self.operability['cabinet']) and self.states['cabinet_open']:
             self.states['cabinet_open'] = 0
-            print("Door closed.")
+            # print("Door closed.")
         else:
             return Reward.failed_action
         return 0
@@ -184,7 +184,7 @@ class HouseholdEnv(gym.Env, EzPickle):
     def _get_tea(self):
         if self.robot_pos in self.operability['cabinet'] and not self.states['has_tea'] and self.states['cabinet_open']:
             self.states['has_tea'] = 1
-            print("Got tea.")
+            # print("Got tea.")
         else:
             return Reward.failed_action
         return 0
@@ -193,7 +193,7 @@ class HouseholdEnv(gym.Env, EzPickle):
         if (self.robot_pos in self.operability['cabinet'] and not self.states['has_soup_jar']
                 and self.states['cabinet_open']):
             self.states['has_soup_jar'] = 1
-            print("Got soup jar.")
+            # print("Got soup jar.")
         else:
             return Reward.failed_action
         return 0
@@ -201,7 +201,7 @@ class HouseholdEnv(gym.Env, EzPickle):
     def _get_saucepan(self):
         if (self.robot_pos in self.operability['sink']) and not self.states['holding_saucepan']:
             self.states['holding_saucepan'] = 1
-            print("Got saucepan")
+            # print("Got saucepan")
         else:
             return Reward.failed_action
         return 0
@@ -209,7 +209,7 @@ class HouseholdEnv(gym.Env, EzPickle):
     def _turn_on_heat(self):
         if (self.robot_pos in self.operability['stove']) and not self.states['fire_on']:
             self.states['fire_on'] = 1
-            print("Fire turned on")
+            # print("Fire turned on")
         else:
             return Reward.failed_action
         return 0
@@ -217,7 +217,7 @@ class HouseholdEnv(gym.Env, EzPickle):
     def _turn_off_heat(self):
         if self.robot_pos in self.operability['stove'] and self.states['fire_on']:
             self.states['fire_on'] = 0
-            print("Fire turned off")
+            # print("Fire turned off")
         else:
             return Reward.failed_action
         return 0
@@ -229,7 +229,7 @@ class HouseholdEnv(gym.Env, EzPickle):
             self.states['heated_up'] = 1
             if Tasks.to_dec(self.task_to_do) == Tasks.MAKE_TEA.value:
                 self.states['has_boiling_water'] = 1
-                print("Have boiling water")
+                # print("Have boiling water")
             elif Tasks.to_dec(self.task_to_do) == Tasks.MAKE_SOUP.value:
                 self.task_done = True
         else:
@@ -244,7 +244,7 @@ class HouseholdEnv(gym.Env, EzPickle):
                      not self.states['saucepan_full'] and self.states['has_soup_jar'])
         if cond_tea or cond_soup:
             self.states['saucepan_full'] = 1
-            print("Saucepan full")
+            # print("Saucepan full")
         else:
             return Reward.failed_action
         return 0
