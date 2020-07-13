@@ -248,8 +248,10 @@ class HouseholdEnv(gym.Env, EzPickle):
         return 0
 
     def _rinse_and_dry(self):
-        if (self.robot_pos in self.operability['sink'] and self.states['has_cleaning_cloth']
-                and self.states['tap_open'] and self.states['stove_cleaned']):
+        # Not quite elegant but it should work..
+        if (Tasks.to_dec(self.task_to_do) == Tasks.CLEAN_STOVE.value and
+                self.robot_pos in self.operability['sink'] and self.states['has_cleaning_cloth'] and
+                self.states['tap_open'] and self.states['stove_cleaned']):
             self.task_done = True
         else:
             return Reward.failed_action
