@@ -419,6 +419,7 @@ class HouseholdEnv(gym.Env, EzPickle):
                          and self.states['whisked'] and self.states['heated_up'] and self.states['fire_on'])
         if cond_omelette or cond_pancakes:
             self.states['flipped'] = 1
+            self.states['item_cooked'] = 1
             self.task_done = True
         else:
             return Reward.failed_action
