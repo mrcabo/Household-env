@@ -468,6 +468,7 @@ class HouseholdEnv(gym.Env, EzPickle):
         reward = self.action_dict[action]()
         done = False
 
+        # TODO: all this is overkill with new changes... but too lazy to change it now..
         # Check if all the requirements are fulfilled for the specified task
         if self.task_done:
             # Make tea
