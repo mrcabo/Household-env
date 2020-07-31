@@ -93,7 +93,7 @@ class HouseholdEnv(gym.Env, EzPickle):
                        'has_cleaning_cloth': 0, 'has_cleaning_product': 0, 'stove_cleaned': 0,
                        'has_pasta': 0, 'has_sauce': 0, 'pasta_drained': 0, 'item_cooked': 0,
                        'has_eggs': 0, 'has_milk': 0, 'has_pancake_mix': 0, 'holding_frying_pan': 0,
-                       'whisked': 0, 'flipped': 0}
+                       'whisked': 0, 'rinsed': 0}
 
         self.action_dict = {0: self._move_up,
                             1: self._move_down,
@@ -262,15 +262,15 @@ class HouseholdEnv(gym.Env, EzPickle):
         # Not quite elegant but it should work..
         if (Tasks.to_dec(self.task_to_do) == Tasks.CLEAN_STOVE.value and
                 self.robot_pos in self.operability['sink'] and self.states['has_cleaning_cloth'] and
-                self.states['tap_open'] and self.states['stove_cleaned']):
-            self.task_done = True
+                self.states['tap_open'] and self.states['stove_cleaned'] and not self.states['rinsed']):
+            self.states['rinsed'] = 1
         else:
             return Reward.failed_action
         return 0
 
     def _drain(self):
-        if (self.robot_pos in self.operability['sink'] and not self.states['pasta_drained']
-                and self.states['item_cooked']):
+        if (Tasks.to_dec(self.task_to_do) == Tasks.MAKE_PASTA.value and self.robot_pos in self.operability['sink']
+                and not self.states['pasta_drained'] and self.states['item_cooked'] and not self.states['fire_on']):
             self.states['pasta_drained'] = 1
         else:
             return Reward.failed_action
@@ -293,9 +293,13 @@ class HouseholdEnv(gym.Env, EzPickle):
         return 0
 
     def _turn_off_heat(self):
+        cond_omelette = Tasks.to_dec(self.task_to_do) == Tasks.MAKE_OMELETTE.value and self.states['item_cooked']
+        cond_pancakes = Tasks.to_dec(self.task_to_do) == Tasks.MAKE_PANCAKES.value and self.states['item_cooked']
+        cond_soup = Tasks.to_dec(self.task_to_do) == Tasks.MAKE_SOUP.value and self.states['heated_up']
         if self.robot_pos in self.operability['stove'] and self.states['fire_on']:
             self.states['fire_on'] = 0
-            # print("Fire turned off")
+            if cond_soup or cond_pancakes or cond_omelette:
+                self.task_done = True
         else:
             return Reward.failed_action
         return 0
@@ -314,8 +318,6 @@ class HouseholdEnv(gym.Env, EzPickle):
             self.states['heated_up'] = 1
             if cond_tea or cond_pasta:
                 self.states['has_boiling_water'] = 1
-            elif cond_soup:
-                self.task_done = True
         else:
             return Reward.failed_action
         return 0
@@ -344,22 +346,27 @@ class HouseholdEnv(gym.Env, EzPickle):
         return 0
 
     def _close_tap(self):
+        cond_clean_stove = Tasks.to_dec(self.task_to_do) == Tasks.CLEAN_STOVE.value and self.states['rinsed']
         if (self.robot_pos in self.operability['sink']) and self.states['tap_open']:
             self.states['tap_open'] = 0
+            if cond_clean_stove:
+                self.task_done = True
         else:
             return Reward.failed_action
         return 0
 
     def _mix(self):
         if Tasks.to_dec(self.task_to_do) == Tasks.MAKE_TEA.value:
-            if self.states['has_tea'] and self.states['has_boiling_water']:
+            if (self.states['has_tea'] and self.states['has_boiling_water'] and not self.states['tap_open']
+                    and not self.states['fire_on'] and not self.states['cabinet_open']):
                 self.task_done = True
             else:
                 return Reward.failed_action
         elif Tasks.to_dec(self.task_to_do) == Tasks.MAKE_PASTA.value:
             # adding the pasta to water
             if ((self.robot_pos in self.operability['stove']) and self.states['has_boiling_water']
-                    and self.states['has_pasta'] and not self.states['item_cooked']):
+                    and self.states['has_pasta'] and not self.states['item_cooked'] and not self.states['tap_open']
+                    and not self.states['cabinet_open']):
                 self.states['item_cooked'] = 1
             # adding the sauce to pasta
             elif self.states['item_cooked'] and self.states['pasta_drained']:
@@ -402,10 +409,10 @@ class HouseholdEnv(gym.Env, EzPickle):
 
     def _whisk(self):
         cond_omelette = (Tasks.to_dec(self.task_to_do) == Tasks.MAKE_OMELETTE.value
-                         and self.states['has_eggs'] and not self.states['whisked'])
+                         and self.states['has_eggs'] and not self.states['whisked'] and not self.states['cabinet_open'])
         cond_pancakes = (Tasks.to_dec(self.task_to_do) == Tasks.MAKE_PANCAKES.value
                          and self.states['has_eggs'] and self.states['has_pancake_mix'] and self.states['has_milk']
-                         and not self.states['whisked'])
+                         and not self.states['whisked'] and not self.states['cabinet_open'])
         if cond_omelette or cond_pancakes:
             self.states['whisked'] = 1
         else:
@@ -414,13 +421,11 @@ class HouseholdEnv(gym.Env, EzPickle):
 
     def _flip(self):
         cond_omelette = (Tasks.to_dec(self.task_to_do) == Tasks.MAKE_OMELETTE.value
-                         and self.states['whisked'] and self.states['heated_up'] and self.states['fire_on'])
+                         and self.states['heated_up'] and self.states['fire_on'])
         cond_pancakes = (Tasks.to_dec(self.task_to_do) == Tasks.MAKE_PANCAKES.value
-                         and self.states['whisked'] and self.states['heated_up'] and self.states['fire_on'])
+                         and self.states['heated_up'] and self.states['fire_on'])
         if cond_omelette or cond_pancakes:
-            self.states['flipped'] = 1
             self.states['item_cooked'] = 1
-            self.task_done = True
         else:
             return Reward.failed_action
         return 0

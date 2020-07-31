@@ -9,7 +9,7 @@ env = gym.make('household_env:Household-v0')
 x = 0
 while x != -1:
     state = env.reset()
-    env.set_current_task(Tasks.MAKE_PANCAKES)
+    env.set_current_task(Tasks.MAKE_TEA)
     env.render()
     done = False
     while not done:
@@ -23,8 +23,8 @@ while x != -1:
         state = next_state
         env.render()
         # print(f"Next_state: {next_state}")
-        print(f"Reward: {reward}, Done: {done}")
         print(f"Done: {done}")
+        print(f"REWARD: {reward}")
     print("End of episode\n\n")
 
 env.close()
