@@ -24,7 +24,7 @@ Rewards = namedtuple('Rewards', ['bump_into_wall',
                                  'walking',
                                  'failed_action',
                                  'completed_task'])
-Reward = Rewards(-3., -.1, -1, 100.)
+Reward = Rewards(-3., -.1, -3., 100.)
 
 
 def print_vision_grid(grid):
@@ -469,6 +469,7 @@ class HouseholdEnv(gym.Env, EzPickle):
         reward = self.action_dict[action]()
         done = False
 
+        # TODO: all this is overkill with new changes... but too lazy to change it now..
         # Check if all the requirements are fulfilled for the specified task
         if self.task_done:
             # Make tea
